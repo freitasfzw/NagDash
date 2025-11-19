@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NagDash - Protótipo</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+    }
+
+    #map {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+
+  <script>
+    // Coordenadas iniciais (exemplo: Alegrete-RS)
+    const inicial = [-29.7833, -55.7919];
+
+    // Cria o mapa
+    const mapa = L.map('map').setView(inicial, 13);
+
+    // Camada de mapa (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(mapa);
+
+    // Exemplo de marcador — depois será trocado pelos dados do Nagios
+    const marcador = L.marker(inicial).addTo(mapa);
+    marcador.bindPopup("<b>NagDash inicial!</b><br>Aqui começa a brincadeira.");
+  </script>
+</body>
+
+</html>
