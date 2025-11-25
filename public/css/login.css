@@ -1,0 +1,302 @@
+:root {
+    --bg: #000007;                 /* preto-azulado profundo (fundo da logo) */
+    --card: #090021;               /* roxo-azul escuro igual ao background da logo */
+    --muted: #B5E9FF;              /* azul claro suave (textos secundários) */
+    --text: #ffffff;               /* branco-azulado brilhante */
+    --accent: #00C8FF;             /* azul neon principal da borda */
+    --accent-2: #0099ff;           /* azul intenso de brilho */
+    --radius: 16px;
+    --shadow: 0 10px 40px rgba(0, 200, 255, .25); /* glow azul suave */
+}
+
+/* reset simples */
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--bg), #000000);
+    color: var(--text)
+}
+
+/* ============================================
+   CORREÇÃO FINAL • Login-vai-funcionar-agora
+   ============================================ */
+
+.login-layout {
+    display: flex;
+    height: 100vh;   /* altura da tela inteira */
+}
+
+.login-left {
+    flex: 2;                /* ocupa metade */
+    height: 100%;           /* força altura */
+    position: relative;
+    overflow: hidden;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.login-left img {
+    position: absolute;
+animation: floatzoom 6s ease-in-out infinite;
+    object-fit: cover;
+    z-index: 1;
+}
+
+/* degradê que deve aparecer por cima */
+.login-left::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    width: 300px;      /* ajuste do tamanho do fade */
+    height: 100%;       /* AGORA FUNCIONA */
+
+    background: linear-gradient(
+        to left,
+        rgb(0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.75) 40%,
+        rgba(0, 0, 0, 0) 100%
+    );
+
+    z-index: 2;
+    pointer-events: none;
+}
+
+
+
+/* form column */
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 36px;
+    background: transparent
+}
+
+.center {
+    min-height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 12px
+}
+
+/* card */
+.card {
+    position: relative;
+    width: 480px;
+    background: linear-gradient(180deg, var(--bg), var(--card));
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: var(--shadow);
+    overflow: hidden
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), transparent, var(--accent));
+    background-size: 300% 100%;
+    animation: energiaFluida 15s linear infinite;
+    opacity: 0.95
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), transparent, var(--accent));
+    background-size: 300% 100%;
+    animation: energiaFluida 15s linear infinite reverse;
+    opacity: 0.95
+}
+
+@keyframes energiaFluida {
+    0% {
+        background-position: 0% 0
+    }
+
+    100% {
+        background-position: -200% 0
+    }
+}
+
+.card-header {
+    padding: 26px 20px 8px;
+    text-align: center
+}
+
+.card-header h2 {
+    font-size: 52px;
+    margin: 0;
+    letter-spacing: 1px
+}
+
+.card-header h3 {
+    font-size: 18px;
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-weight: 400
+}
+
+/* card content */
+.card-content {
+    padding: 18px
+}
+
+/* labels & inputs */
+label {
+    display: block;
+    font-size: 1rem;
+    color: var(--text);
+    margin: 10px 0 6px
+}
+
+input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(10, 10, 12, 0.35);
+    color: var(--text);
+    outline: none;
+    transition: box-shadow .12s, border-color .12s
+}
+
+input::placeholder {
+    color: var(--muted)
+}
+
+input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 6px 22px rgba(114, 41, 255, 0.08);
+    transform: translateY(-1px)
+}
+
+/* password toggle button */
+.pass-wrap {
+    position: relative
+}
+
+#togglePass {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--accent)
+}
+
+#togglePass.active {
+    filter: drop-shadow(0 6px 18px rgba(119, 0, 255, 0.12))
+}
+
+/* button */
+button.full {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-weight: 700;
+    font-size: 24px;
+    box-shadow: 0 10px 30px rgba(119, 0, 255, 0.12);
+    cursor: pointer;
+    transition: transform .12s
+}
+
+button.full:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px rgba(119, 0, 255, 0.18)
+}
+
+/* footer */
+.foot {
+    padding: 12px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    display: flex;
+    justify-content: space-between;
+    color: var(--text);
+    font-size: .9rem
+}
+
+/* alert styles */
+.alert {
+    display: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 12px
+}
+
+.alert.error {
+    display: block;
+    background: rgba(225, 0, 85, 0.06);
+    border: 1px solid rgba(225, 0, 85, 0.18);
+    color: #ff9ac3
+}
+
+/* responsiveness */
+@media (max-width: 900px) {
+    .login-layout {
+        flex-direction: column
+    }
+
+    .login-left {
+        height: 34vh;
+        padding: 8px
+    }
+
+    .login-left img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px
+    }
+
+    .login-right {
+        height: auto;
+        padding: 18px
+    }
+
+    .card {
+        max-width: 640px
+    }
+}
+
+/* float animation */
+@keyframes floatzoom {
+    0% {
+        transform: translateY(0) scale(1)
+    }
+
+    50% {
+        transform: translateY(-10px) scale(1.02)
+    }
+
+    100% {
+        transform: translateY(0) scale(1)
+    }
+}

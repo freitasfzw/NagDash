@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrar — SIVIR</title>
+
+    <!-- fonte -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS do login -->
+    <link rel="stylesheet" href="/css/login.css">
+
+    <!-- favicon -->
+    <link rel="icon" type="image/png" href="/Sivir-Login.png" />
+</head>
+
+<body>
+    <div class="login-layout">
+
+        <!-- LADO ESQUERDO (IMAGEM / ARTE) -->
+        <div class="login-left" aria-hidden="true">
+            <!-- usando a imagem Sivir-Login.png presente em public/ -->
+            <img src="/Sivir-Login.png" alt="SIVIR art" />
+        </div>
+
+        <!-- LADO DIREITO (FORMULÁRIO) -->
+        <div class="login-right">
+            <main class="center">
+                <section class="card" aria-label="Painel de Login">
+                    <div class="card-header">
+                        <div class="brand">
+                            <div>
+                                <h2>SIVIR</h2>
+                                <h3>Sistema Integrado de Vigilância</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <!-- mostra msg de erro se ?error=1 -->
+                        <div id="msg" class="alert" role="alert" aria-live="polite"></div>
+
+                        <form id="formLogin" method="POST" action="/login" novalidate autocomplete="off"
+                            autocorrect="off" autocapitalize="off" spellcheck="false">
+
+                            <label for="email">Usuário</label>
+                            <input style="font-size: 16px;" id="email" name="username" type="text"
+                                placeholder="seu.usuario" autocomplete="off" autocorrect="off" autocapitalize="off"
+                                spellcheck="false" required />
+
+                            <label for="senha">Senha</label>
+                            <div class="pass-wrap" style="position:relative">
+
+                                <input id="senha" name="password" type="password" placeholder="••••••••"
+                                    autocomplete="new-password" autocorrect="off" autocapitalize="off"
+                                    spellcheck="false" required />
+
+                                <button type="button" id="togglePass" class="pass-btn"
+                                    aria-label="Mostrar/ocultar senha">
+                                    <svg id="iconPass" viewBox="0 0 24 24" fill="none">
+                                        <path
+                                            d="M12 5C7 5 2.73 8.11 1 12C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 12C21.27 8.11 17 5 12 5Z"
+                                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.2" />
+                                    </svg>
+                                </button>
+
+                            </div>
+
+                            <button id="btnEntrar" class="full" type="submit" style="margin-top:14px">
+                                Entrar
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                    <div class="foot">
+                        <span class="small">© <span id="year"></span> - SIVIR</span>
+                        <span class="small">GitHub: <a style="text-decoration: none; color: rgb(0, 162, 255);"
+                                href="https://github.com/freitasfzw/SIVIR" target="_blank" rel="noopener">SIVIR
+                                Project</a></span>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // toggle senha
+        (function () {
+            const pass = document.getElementById('senha');
+            const btn = document.getElementById('togglePass');
+            btn.addEventListener('click', () => {
+                const type = pass.type === 'password' ? 'text' : 'password';
+                pass.type = type;
+                btn.classList.toggle('active', type === 'text');
+            });
+
+            // mostra erro se ?error=1
+            const params = new URLSearchParams(location.search);
+            if (params.get('error') === '1' || params.get('e')) {
+                const el = document.getElementById('msg');
+                el.className = 'alert error';
+                el.innerText = 'Usuário ou senha incorretos.';
+            }
+
+            // insere ano no rodapé
+            document.getElementById('year').textContent = new Date().getFullYear();
+        })();
+    </script>
+</body>
+
+</html>
