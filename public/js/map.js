@@ -20,7 +20,7 @@ const clusterGroup = L.markerClusterGroup({
   zoomToBoundsOnClick: false,
   spiderfyOnClick: true,
   spiderfyDistanceMultiplier: 2.2,
-  maxClusterRadius: 5
+  maxClusterRadius: 3
 });
 mapa.addLayer(clusterGroup);
 

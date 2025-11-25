@@ -1,12 +1,20 @@
 :root {
-    --bg: #000007;                 /* preto-azulado profundo (fundo da logo) */
-    --card: #090021;               /* roxo-azul escuro igual ao background da logo */
-    --muted: #B5E9FF;              /* azul claro suave (textos secundários) */
-    --text: #ffffff;               /* branco-azulado brilhante */
-    --accent: #00C8FF;             /* azul neon principal da borda */
-    --accent-2: #0099ff;           /* azul intenso de brilho */
+    --bg: #000007;
+    /* preto-azulado profundo (fundo da logo) */
+    --card: #090021;
+    /* roxo-azul escuro igual ao background da logo */
+    --muted: #B5E9FF;
+    /* azul claro suave (textos secundários) */
+    --text: #ffffff;
+    /* branco-azulado brilhante */
+    --accent: #00C8FF;
+    /* azul neon principal da borda */
+    --accent-2: #0099ff;
+    /* azul intenso de brilho */
+    --panel-back: #000114;
     --radius: 16px;
-    --shadow: 0 10px 40px rgba(0, 200, 255, .25); /* glow azul suave */
+    --shadow: 0 10px 40px rgba(0, 200, 255, .25);
+    /* glow azul suave */
 }
 
 /* reset simples */
@@ -18,8 +26,9 @@ html,
 body {
     height: 100%;
     margin: 0;
+    overflow: hidden;
     font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-    background: linear-gradient(180deg, var(--bg), #000000);
+    background: #000114;
     color: var(--text)
 }
 
@@ -27,65 +36,61 @@ body {
    CORREÇÃO FINAL • Login-vai-funcionar-agora
    ============================================ */
 
-.login-layout {
-    display: flex;
-    height: 100vh;   /* altura da tela inteira */
-}
-
-.login-left {
-    flex: 2;                /* ocupa metade */
-    height: 100%;           /* força altura */
-    position: relative;
-    overflow: hidden;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-.login-left img {
-    position: absolute;
-animation: floatzoom 6s ease-in-out infinite;
-    object-fit: cover;
+/* imagem cobrindo o fundo inteiro */
+.login-bg {
+    position: fixed;
+    inset: 0;
     z-index: 1;
+    overflow: hidden;
+    /* garante que nada vaze */
 }
 
-/* degradê que deve aparecer por cima */
-.login-left::after {
+.login-bg img {
+    height: 100%;
+    margin-left: 120px;
+    object-fit: cover;
+    animation: floatzoom 6s ease-in-out infinite;
+}
+
+/* degrade para esconder a quebra */
+.login-bg::before {
     content: "";
     position: absolute;
+    left: 0;
     top: 0;
-    right: 0;
-
-    width: 300px;      /* ajuste do tamanho do fade */
-    height: 100%;       /* AGORA FUNCIONA */
-
-    background: linear-gradient(
-        to left,
-        rgb(0, 0, 0) 0%,
-        rgba(0, 0, 0, 0.75) 40%,
-        rgba(0, 0, 0, 0) 100%
-    );
-
+    width: 250px;
+    height: 100%;
     z-index: 2;
     pointer-events: none;
+    background: linear-gradient(to right,
+            #000114 0%,
+            rgba(0, 0, 20, 0.85) 20%,
+            rgb(0, 0, 20) 40%,
+            rgba(0, 0, 20, 0.0) 100%);
 }
 
-
-
-/* form column */
-.login-right {
-    flex: 1;
+/* painel flutuante à direita */
+.login-panel {
+    position: fixed;
+    right: 200px;
+    top: 0;
+    width: 480px;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 36px;
-    background: transparent
+    padding: 24px;
+    z-index: 10;
+    backdrop-filter: blur(4px);
 }
 
 .center {
     min-height: 100%;
     display: grid;
     place-items: center;
-    padding: 12px
+    padding: 12px;
+
+
 }
 
 /* card */
@@ -96,7 +101,7 @@ animation: floatzoom 6s ease-in-out infinite;
     border-radius: var(--radius);
     border: 1px solid rgba(255, 255, 255, 0.04);
     box-shadow: var(--shadow);
-    overflow: hidden
+    overflow: hidden;
 }
 
 .card::before {

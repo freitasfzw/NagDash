@@ -4,93 +4,106 @@
 <head>
     <meta charset="UTF-8">
     <title>Painel Administrativo • SIVIR</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/admin.css">
-    <link rel="icon" type="image/png" href="/favicon.png">
 </head>
 
 <body>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <img src="/favicon.png" class="logo">
-            <h2>SIVIR</h2>
-            <span>Painel Admin</span>
-        </div>
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img src="favicon2.png" alt="Logo SIVIR" style="width:32px; height:32px; border-radius:6px;">
+        <h1 style="margin:0;">SIVIR</h1>
+      </div>
 
-<div class="sidebar-footer">
-    <a href="/" class="nav-item footer-btn">Voltar</a>
-    <a href="/logout" class="nav-item footer-btn logout">Deslogar</a>
+      <span class="subtitle">Painel de Monitoramento</span>
+    </div>
+
+    <div class="menu-item" role="button" tabindex="0">
+      <i class="icon" data-icon="server"></i>
+      <div>
+        <div class="menu-title">Usuarios e Acessos</div>
+        <div class="menu-subtitle">Gerenciar acessos ao painel</div>
+      </div>
+    </div>
+
+
+<div id="sidebar-footer">
+
+  <!-- Exportar Dados vira acesso ao painel -->
+  <button id="adminButton" class="footer-btn" type="button" onclick="window.location.href='/'">
+    <i data-icon="shield"></i> Voltar ao Sistema
+  </button>
+
+  <button id="logoutButton" class="footer-btn logout" type="button" onclick="window.location.href='/logout'">
+    <i data-icon="log-out"></i> Sair
+  </button>
+
 </div>
-    </aside>
+  </div>
 
-    <!-- MAIN -->
-    <main class="main">
 
-        <!-- NAVBAR SUPERIOR -->
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="content">
+
+        <!-- HEADER -->
         <header class="topbar">
-            <h1>Administração do Sistema</h1>
-            <span class="tag">Acesso restrito</span>
+            <div>
+                <h1>Painel Administrativo</h1>
+                <p class="subtitle">Gerencie usuários e configurações do sistema</p>
+            </div>
+
         </header>
 
         <!-- CARDS -->
-        <section class="cards">
-            <div class="card">
+        <section class="cards-grid">
+            <div class="card stat">
                 <h3>Total de Usuários</h3>
                 <p id="countUsers">0</p>
             </div>
 
-            <div class="card">
-                <h3>Admin</h3>
+            <div class="card stat">
+                <h3>Administradores</h3>
                 <p>1</p>
             </div>
 
-            <div class="card">
-                <h3>Status do Sistema</h3>
-                <p class="status-ok">Operacional</p>
+            <div class="card stat">
+                <h3>Status do Nagios</h3>
+                <p class="status-ok">Online</p>
             </div>
         </section>
 
-        <!-- FORM DE CRIAÇÃO -->
-        <section class="box">
-            <h2>Criar Novo Usuário</h2>
+        <!-- CRIAÇÃO DE USUÁRIO -->
+        <section class="section">
+            <h2>Criar Usuário</h2>
 
-            <form action="/admin/create" method="POST" class="form" autocomplete="off" autocorrect="off"
-                autocapitalize="off" spellcheck="false">
-
-                <input type="text" name="username" placeholder="Usuário" autocomplete="off" autocorrect="off"
-                    autocapitalize="off" spellcheck="false" required>
-
-                <input type="password" name="password" placeholder="Senha" autocomplete="new-password" autocorrect="off"
-                    autocapitalize="off" spellcheck="false" required>
-
-                <button type="submit" class="btn">Criar Usuário</button>
+            <form action="/admin/create" method="POST" class="form" autocomplete="off">
+                <input type="text" name="username" placeholder="Usuário"  required>
+                <input type="password" name="password" placeholder="Senha" autocomplete="new-password" required>
+                <button class="btn">Criar Usuário</button>
             </form>
-
         </section>
 
-        <!-- TABELA DE USUÁRIOS -->
-        <section class="box">
-            <h2>Usuarios Cadastrados</h2>
+        <!-- TABELA -->
+        <section class="section">
+            <h2>Usuários Cadastrados</h2>
 
             <div class="table">
-                <div class="table-header">
+                <div class="table-head">
                     <span>Usuário</span>
                     <span>Tipo</span>
-                    <span>Ação</span>
+                    <span>Ações</span>
                 </div>
 
                 <div id="userRows"></div>
-
             </div>
-
         </section>
+
     </main>
 
-
-    <script>
+        <script>
         async function loadUsers() {
             const res = await fetch("/admin/users");
             const users = await res.json();
@@ -121,7 +134,7 @@
 
         loadUsers();
     </script>
-
+    
 </body>
 
 </html>
