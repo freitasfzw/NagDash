@@ -13,6 +13,8 @@ const PUBLIC_DIR = path.join(__dirname, "public");
 
 // ===========================
 //  BODY PARSER — DEVE VIR ANTES DE TUDO
+
+// nao importa como isso funciona, nao altera
 // ===========================
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
