@@ -4,6 +4,9 @@ let configCidades = null;
 let cidadeAtualIndex = 0;
 let intervaloCidades = null;
 let navegacaoAutomatica = true;
+let omDownList = [];
+let omDownIndex = 0;
+let omDownInterval = null;
 
 
 // Carrega configuração das cidades
@@ -11,9 +14,6 @@ async function carregarCidades() {
   try {
     const res = await fetch("/cidades.json", { cache: "no-store" });
     configCidades = await res.json();
-
-    // PRÉ-CACHE AQUI
-    await precacheCidades(configCidades.cidades);
 
     iniciarNavegacao();
   } catch (err) {
@@ -37,7 +37,7 @@ async function carregarCidades() {
 }
 
 // ========== INICIALIZAÇÃO DO MAPA ==========
-const inicial = [-29.684, -53.806];
+const inicial = [-29.699, -53.827];
 const mapa = L.map("map", {
   zoomControl: false,
   maxZoom: 20,
@@ -45,7 +45,7 @@ const mapa = L.map("map", {
 }).setView(inicial, 13.5);
 
 // Tile escuro
-L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 20,
   attribution:
     'SIVIR Desenvolvido por <a href="https://github.com/freitasfzw" target="_blank">Zucchetto</a> e <a href="https://github.com/HnrqHolanda" target="_blank">Henrique Holanda</a>',
@@ -71,50 +71,58 @@ clusterGroup.on("clusterclick", function (a) {
 const markers = new Map();
 const enlaceLayer = L.layerGroup().addTo(mapa);
 
-// ========== PRÉ-CACHE DE CIDADES ==========
-async function precacheCidades(cidades) {
-  console.log("Pré-cache de tiles das cidades iniciado...");
-
-  for (const c of cidades) {
-    // cria div temporária (não aparece na tela)
-    const div = document.createElement("div");
-    div.style.width = "1px";
-    div.style.height = "1px";
-    div.style.position = "absolute";
-    div.style.left = "-9999px";
-    document.body.appendChild(div);
-
-    // cria mapa invisível
-    const fakeMap = L.map(div, {
-      zoomControl: false,
-      attributionControl: false,
-      fadeAnimation: false,
-      zoomAnimation: false,
-    }).setView([c.latitude, c.longitude], c.zoom);
-
-    // usa o mesmo tileLayer do mapa principal
-    const tile = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      {
-        subdomains: "abcd",
-        maxZoom: 20,
-      }
-    ).addTo(fakeMap);
-
-    // espera um pouco para garantir carregamento das tiles
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-
-    // remove mapa invisível
-    fakeMap.remove();
-    div.remove();
-
-    console.log(`Cidade pré-cacheada: ${c.nome}`);
-  }
-
-  console.log("Pré-cache concluído.");
-}
 
 // ========== NAVEGAÇÃO ENTRE CIDADES ==========
+function focarOMsFora() {
+  if (omDownList.length === 0) return;
+
+  // Pausa navegação automática
+  pararNavegacaoAutomatica();
+
+  // Limpa loop anterior se existir
+  if (omDownInterval) {
+    clearInterval(omDownInterval);
+    omDownInterval = null;
+  }
+
+  // Se só tem 1 OM fora → fixa nela
+  if (omDownList.length === 1) {
+    const om = omDownList[0];
+    mapa.flyTo([om.latitude, om.longitude], 14, { duration: 2 });
+    return;
+  }
+
+  // Se tem várias → criar rotação
+  omDownIndex = 0;
+
+  function rotacionar() {
+    const om = omDownList[omDownIndex];
+    mapa.flyTo([om.latitude, om.longitude], 14, { duration: 2 });
+
+    omDownIndex = (omDownIndex + 1) % omDownList.length;
+  }
+
+  // Chama imediatamente
+  rotacionar();
+
+  // Depois continua a cada 20s
+  omDownInterval = setInterval(rotacionar, 20000);
+}
+
+function restaurarNavegacaoNormal() {
+  if (omDownInterval) {
+    clearInterval(omDownInterval);
+    omDownInterval = null;
+  }
+
+  omDownList = [];
+
+  // Só reativa se o usuário NÃO estiver em modo manual
+  if (navegacaoAutomatica) {
+    reativarNavegacaoAutomatica();
+  }
+}
+
 function irParaCidade(index, comTransicao = true) {
   if (!configCidades || !configCidades.cidades.length) return;
 
@@ -375,29 +383,85 @@ function upsertMarker(item) {
   }
 }
 
+// Aviso OM Down
+function criarAvisoOM() {
+  const aviso = document.createElement("div");
+  aviso.id = "avisoOM";
+  aviso.style.position = "absolute";
+  aviso.style.bottom = "0";
+  aviso.style.left = "0";
+  aviso.style.right = "0";
+  aviso.style.padding = "12px 20px";
+  aviso.style.background = "rgba(255, 0, 0, 0.9)";
+  aviso.style.animation = "avisoBlink 1.2s infinite";
+  aviso.style.color = "#000";
+  aviso.style.fontWeight = "600";
+  aviso.style.fontSize = "16px";
+  aviso.style.textAlign = "center";
+  aviso.style.zIndex = "1998";
+  aviso.style.display = "none";
+  aviso.style.boxShadow = "0 2px 10px rgba(0,0,0,0.4)";
+  aviso.style.fontFamily =
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
+  aviso.textContent =
+    "Atenção: indisponibilidade de rede detectada na OM a seguir.";
+
+  document.body.appendChild(aviso);
+}
+
+criarAvisoOM();
+
 // Chama API
 async function fetchAndUpdate() {
   const loadingBox = document.getElementById("loadingOMs");
+  const aviso = document.getElementById("avisoOM");
 
-  // evita múltiplos popups
+  // Evita múltiplas animações de loading
   if (!isLoadingOMs) {
     isLoadingOMs = true;
     loadingBox.style.display = "block";
-    requestAnimationFrame(() => loadingBox.style.opacity = "1");
+    requestAnimationFrame(() => (loadingBox.style.opacity = "1"));
   }
 
   try {
     const res = await fetch("/api/om-status", { cache: "no-store" });
     const data = await res.json();
 
-    // atualiza markers
+    // Atualiza markers
     data.forEach(upsertMarker);
+
+    // ==== DETECÇÃO DE OM FORA ====
+// Lista de OMs que não devem gerar alerta
+const omExcecoes = [
+  "CICA"
+];
+
+// Filtra OMs fora, excluindo as exceções
+omDownList = data.filter(item =>
+  item.status !== "UP" && !omExcecoes.includes(item.hostname)
+);
+
+    if (omDownList.length > 0) {
+      // Exibe aviso de alerta
+      if (aviso) aviso.style.display = "block";
+
+      // Foca nas OMs indisponíveis
+      focarOMsFora();
+
+    } else {
+      // Some aviso
+      if (aviso) aviso.style.display = "none";
+
+      // Restaura navegação automática
+      restaurarNavegacaoNormal();
+    }
 
     // ========= ATUALIZA PAINEL DE MONITORAMENTO =========
     let up = 0;
     let down = 0;
 
-    data.forEach(item => {
+    data.forEach((item) => {
       if (item.status === "UP") up++;
       else down++;
     });
