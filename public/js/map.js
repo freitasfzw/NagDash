@@ -7,6 +7,8 @@ let navegacaoAutomatica = true;
 let omDownList = [];
 let omDownIndex = 0;
 let omDownInterval = null;
+let cacheOMs = [];
+let ultimaAtualizacao = null;
 
 
 // Carrega configuração das cidades
@@ -36,6 +38,8 @@ async function carregarCidades() {
   }
 }
 
+
+
 // ========== INICIALIZAÇÃO DO MAPA ==========
 const inicial = [-29.699, -53.827];
 const mapa = L.map("map", {
@@ -58,7 +62,7 @@ const clusterGroup = L.markerClusterGroup({
   zoomToBoundsOnClick: false,
   spiderfyOnClick: true,
   spiderfyDistanceMultiplier: 2.2,
-  maxClusterRadius: 3,
+  maxClusterRadius: 10,
 });
 mapa.addLayer(clusterGroup);
 
@@ -188,6 +192,7 @@ function reativarNavegacaoAutomatica() {
 }
 
 // ========== INTERFACE DE NAVEGAÇÃO ==========
+
 function criarInterfaceNavegacao() {
   const navHTML = `
     <div id="cidadeNavegacao" style="
@@ -530,10 +535,10 @@ carregarCidades();
 
 // Execução inicial + polling das APIs
 fetchAndUpdate();
-setInterval(fetchAndUpdate, 5000);
+setInterval(fetchAndUpdate, 1000);
 
 fetchEnlaces();
-setInterval(fetchEnlaces, 5000);
+setInterval(fetchEnlaces, 1000);
 
 // Sidebar
 document
