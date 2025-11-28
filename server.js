@@ -180,6 +180,10 @@ const HOSTGROUPS = [
   "rosario_do_sul",
 ];
 
+let cacheOMs = [];
+let ultimaAtualizacao = null;
+
+
 async function getHostList() {
   const result = new Set();
 
@@ -194,7 +198,6 @@ async function getHostList() {
       const hosts = Object.keys(json.data.hostlist || {});
       hosts.forEach((h) => result.add(h));
 
-      console.log(`Hostgroup ${g}:`, hosts.length, "hosts carregados");
     } catch (err) {
       console.warn(`Falha ao ler hostgroup ${g}:`, err.message);
     }
@@ -212,10 +215,7 @@ async function getHostDetails(hostname) {
   return json.data.host || null;
 }
 
-// ===========================
-//  API PROTEGIDA
-// ===========================
-app.get("/api/om-status", requireLogin, async (req, res) => {
+async function atualizarCacheOMs() {
   try {
     const locations = await readLocations();
     const hostnames = await getHostList();
@@ -225,36 +225,62 @@ app.get("/api/om-status", requireLogin, async (req, res) => {
       details[h] = await getHostDetails(h);
     }
 
-    const merged = locations.map((loc) => {
+    // Tradutor para os códigos específicos do seu Nagios
+    function translateHostStatus(raw) {
+      if (raw === 0) return 0;   // UP
+      if (raw === 2) return 0;   // também UP no seu ambiente
+      if (raw === 4) return 1;   // DOWN
+      return 3;                  // UNKNOWN
+    }
+
+    // Mapa final do SIVIR
+    const STATUS_MAP = {
+      0: "UP",
+      1: "DOWN",
+      2: "UNREACHABLE",
+      3: "UNKNOWN",
+    };
+
+    // Montagem final do cache
+    cacheOMs = locations.map((loc) => {
       const detail = details[loc.hostname];
 
       if (!detail) {
-        return { ...loc, status: "UNKNOWN", last_check: null };
+        return {
+          ...loc,
+          status: "UNKNOWN",
+          last_check: null,
+        };
       }
 
-      const code = detail.last_hard_state ?? detail.status;
+      // Status bruto vindo da API JSON do Nagios
+      const raw = detail.status;
 
-      const STATUS_MAP = {
-        0: "UP",
-        1: "DOWN",
-        2: "UNREACHABLE",
-        3: "UNKNOWN",
-      };
+      // Traduz para o padrão usado pelo SIVIR
+      const code = translateHostStatus(raw);
 
       return {
         ...loc,
-        status: STATUS_MAP[code] || "UNKNOWN",
-        last_check: detail.last_check
+        status: STATUS_MAP[code],
+        last_check: detail?.last_check
           ? new Date(detail.last_check).toLocaleString("pt-BR")
           : null,
       };
     });
 
-    res.json(merged);
+    ultimaAtualizacao = Date.now();
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.error("Erro no cache de OMs:", err);
   }
+}
+
+
+// ===========================
+//  API PROTEGIDA
+// ===========================
+app.get("/api/om-status", requireLogin, (req, res) => {
+  res.json(cacheOMs);
 });
 
 app.get("/api/enlaces", requireLogin, async (req, res) => {
@@ -405,3 +431,6 @@ function mapServiceStatus(code) {
 app.listen(PORT, () => {
   console.log(`SIVIR rodando em http://0.0.0.0:${PORT}`);
 });
+
+setInterval(atualizarCacheOMs, 2000);
+atualizarCacheOMs(); // iniciar imediatamente
